@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Certificado Oficial de Paciencia</title>
+  <style>
+    :root {
+      --acid: #d9ff00;
+      --hot: #ff2bd6;
+      --cyan: #00f5ff;
+      --mud: #716512;
+      --danger: #ff3300;
+      --paper: #fff7bd;
+      --ink: #161616;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      cursor: crosshair;
+      background:
+        repeating-linear-gradient(37deg, #ff00aa 0 12px, #00ffd5 12px 22px, #f6ff00 22px 31px),
+        radial-gradient(circle at 20% 20%, #fff 0 10%, transparent 11%);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Comic Sans MS", Impact, system-ui, sans-serif;
+      background: rgba(255, 255, 255, 0.58);
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .skip {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      z-index: 40;
+      color: #0300a8;
+      background: #ffff00;
+      border: 5px dashed #ff0000;
+      padding: 4px 9px;
+      transform: rotate(-3deg);
+    }
+
+    .ticker {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      color: #fff;
+      background: linear-gradient(90deg, #000, #a100ff, #008b1f, #000);
+      border-bottom: 7px ridge var(--acid);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-family: Impact, fantasy;
+    }
+
+    .ticker span {
+      display: inline-block;
+      white-space: nowrap;
+      animation: crawl 16s linear infinite;
+      min-width: 100%;
+      padding-left: 100%;
+      text-shadow: 3px 3px #ff0000;
+    }
+
+    @keyframes crawl {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(178px, 238px) minmax(0, 1fr) 112px;
+      gap: 13px;
+      width: min(1240px, calc(100% - 18px));
+      margin: 22px auto 60px;
+    }
+
+    aside,
+    main,
+    .adrail {
+      border: 6px double #111;
+      background: var(--paper);
+      box-shadow: 13px 8px 0 #000, -8px 14px 0 var(--hot);
+    }
+
+    aside {
+      padding: 9px;
+      transform: rotate(-0.8deg);
+      align-self: start;
+      position: sticky;
+      top: 64px;
+    }
+
+    aside h2 {
+      margin: 0 0 8px;
+      color: #0037ff;
+      background: #ffef00;
+      border: 3px dotted #111;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .nav-button {
+      width: 100%;
+      min-height: 48px;
+      margin: 7px 0;
+      color: #fff;
+      background: linear-gradient(140deg, #0a8f00, #ff00f2);
+      border: 4px outset #fff;
+      text-align: left;
+      transform: skew(-5deg);
+    }
+
+    .nav-button:nth-child(odd) {
+      transform: skew(8deg);
+      background: linear-gradient(140deg, #ff5e00, #241eff);
+    }
+
+    main {
+      min-width: 0;
+      padding: clamp(12px, 2vw, 28px);
+      background:
+        linear-gradient(125deg, rgba(255, 255, 0, 0.82), rgba(255, 255, 255, 0.62) 33%, rgba(0, 255, 213, 0.75) 34% 60%, rgba(255, 31, 31, 0.45)),
+        var(--paper);
+    }
+
+    .adrail {
+      padding: 8px;
+      color: #fff;
+      background: #480000;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 18px;
+      line-height: 1.1;
+      animation: pulse 900ms steps(2, end) infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        color: #0011ff;
+        background: #d8ff00;
+        transform: translateY(5px);
+      }
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(170px, 260px);
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 21px;
+      border: 4px solid #000;
+      padding: 13px;
+      background: #fff;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--hot);
+      font-size: clamp(34px, 7vw, 82px);
+      line-height: 0.86;
+      font-family: Impact, "Arial Black", sans-serif;
+      text-shadow: 4px 3px 0 #11ff00, 8px 7px 0 #1000ff;
+    }
+
+    .hero p {
+      max-width: 670px;
+      margin: 16px 0 0;
+      font-size: clamp(16px, 2vw, 23px);
+      color: #003300;
+      background: #ffec00;
+      border: 3px dashed #ff0000;
+      padding: 6px;
+      transform: rotate(1.3deg);
+    }
+
+    .stamp {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      aspect-ratio: 1;
+      min-height: 170px;
+      color: #fff;
+      background:
+        conic-gradient(from 12deg, #ff0000, #ffa500, #ffff00, #00ff00, #00c8ff, #0011ff, #ff00f2, #ff0000);
+      border: 8px groove #111;
+      border-radius: 50%;
+      font-family: Impact, fantasy;
+      font-size: 24px;
+      text-align: center;
+      text-shadow: 2px 2px #000;
+      animation: spin 14s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .chaos-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+      gap: 23px 11px;
+      align-items: start;
+    }
+
+    form {
+      display: grid;
+      gap: 17px;
+      padding: 9px;
+      border: 5px inset var(--cyan);
+      background: rgba(255, 0, 191, 0.14);
+    }
+
+    .field {
+      position: relative;
+      display: grid;
+      gap: 7px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 4px dotted #271111;
+    }
+
+    .field:nth-child(3n) {
+      margin-left: clamp(0px, 5vw, 55px);
+      transform: rotate(-1deg);
+      background: #e5ffb5;
+    }
+
+    .field:nth-child(4n) {
+      margin-right: clamp(0px, 4vw, 48px);
+      transform: rotate(1deg);
+      background: #ffd5f4;
+    }
+
+    label {
+      color: #0000b8;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-decoration: underline wavy #ff0000 2px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      border: 5px groove #ffe600;
+      background: #111;
+      color: #00ff5d;
+      padding: 7px 10px;
+      outline: 4px solid transparent;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline-color: #ff00e1;
+      filter: hue-rotate(90deg);
+    }
+
+    input[type="range"] {
+      accent-color: var(--danger);
+      direction: rtl;
+      background: repeating-linear-gradient(90deg, #ff0000 0 10px, #ffff00 10px 20px);
+      border: 0;
+    }
+
+    .tiny-note {
+      font-size: 13px;
+      color: #6d0000;
+      background: #fff;
+      border-left: 12px solid #00ff62;
+      padding: 4px 6px;
+    }
+
+    .rules {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding-left: 22px;
+      color: #2f1200;
+      font-size: 14px;
+    }
+
+    .check-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      align-items: start;
+      gap: 8px;
+      margin: 7px 0;
+    }
+
+    .check-row input {
+      width: 22px;
+      min-height: 22px;
+      accent-color: var(--hot);
+    }
+
+    .captcha {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(56px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .tile {
+      min-height: 72px;
+      color: #fff;
+      background: linear-gradient(135deg, #1a00ff, #ff0000);
+      border: 4px outset #fff;
+      font-size: clamp(12px, 2vw, 18px);
+      cursor: help;
+    }
+
+    .tile.selected {
+      background: repeating-linear-gradient(45deg, #00ff5d 0 8px, #3b0000 8px 16px);
+      color: #fffb00;
+      transform: rotate(4deg) scale(0.96);
+    }
+
+    .side-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      padding: 12px;
+      border: 5px ridge #ff0000;
+      background: #d3ff00;
+      transform: rotate(0.8deg);
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      color: #001aff;
+      font-size: 21px;
+      line-height: 1;
+    }
+
+    .patience-meter {
+      position: relative;
+      height: 38px;
+      overflow: hidden;
+      border: 4px solid #000;
+      background: #fff;
+    }
+
+    .patience-meter span {
+      display: block;
+      width: 8%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff0000, #ffff00, #00ff55);
+      transition: width 200ms ease;
+    }
+
+    .tooltip-zone {
+      border: 4px dashed #0000ff;
+      background: #ffcadf;
+      padding: 9px;
+    }
+
+    .tooltip-zone:hover::after {
+      content: "La ayuda no esta disponible porque esta disponible.";
+      display: block;
+      margin-top: 8px;
+      color: #fff;
+      background: #000;
+      padding: 8px;
+    }
+
+    .actions {
+      position: relative;
+      min-height: 118px;
+      border: 4px dashed #000;
+      background: rgba(255, 255, 255, 0.42);
+      overflow: hidden;
+    }
+
+    .main-action,
+    .bad-help,
+    .worsen {
+      min-height: 48px;
+      border: 5px outset #e8e8e8;
+      color: #fff;
+      background: #0011ff;
+      padding: 8px 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      box-shadow: 7px 7px 0 #ff0000;
+      cursor: not-allowed;
+    }
+
+    .main-action {
+      position: absolute;
+      left: 18px;
+      top: 26px;
+      transition: left 130ms ease, top 130ms ease, transform 130ms ease;
+      animation: shake 500ms infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(1px, -2px) rotate(-1deg); }
+      50% { transform: translate(-2px, 2px) rotate(1deg); }
+      75% { transform: translate(2px, 1px) rotate(0.5deg); }
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .bad-help {
+      background: #0b7900;
+      cursor: pointer;
+    }
+
+    .worsen {
+      background: #a80000;
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 92px;
+      margin-top: 16px;
+      border: 6px groove #1a1a1a;
+      padding: 10px;
+      background: #fff;
+      color: #111;
+      font-family: "Times New Roman", serif;
+    }
+
+    .progress-shell {
+      height: 28px;
+      margin-top: 10px;
+      border: 3px solid #000;
+      background: #eee;
+    }
+
+    .progress {
+      width: 0;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, #ff0000 0 12px, #ffee00 12px 24px, #00ff6a 24px 36px);
+      transition: width 260ms ease;
+    }
+
+    .error-list {
+      display: grid;
+      gap: 7px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .error-list li {
+      padding: 6px 8px;
+      color: #fff;
+      background: #a00000;
+      border: 2px solid #ffff00;
+    }
+
+    dialog {
+      max-width: min(560px, calc(100% - 28px));
+      color: #1b1200;
+      background: #fff36b;
+      border: 9px ridge #ff00d4;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.38), 17px 17px 0 #00ffe5;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.24);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .worse-mode {
+      filter: contrast(1.35) saturate(1.8);
+    }
+
+    .worse-mode main {
+      transform: rotate(0.7deg);
+    }
+
+    .worse-mode .field {
+      animation: breathe 1.4s infinite alternate;
+    }
+
+    @keyframes breathe {
+      to { transform: scale(1.015) rotate(-0.6deg); }
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 50;
+      width: min(330px, calc(100% - 32px));
+      padding: 12px;
+      color: #fff;
+      background: #000;
+      border: 5px solid #ffef00;
+      box-shadow: 8px 8px 0 #ff00cc;
+      transform: translateY(150%);
+      transition: transform 220ms ease;
+    }
+
+    .toast.visible {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+      }
+
+      .adrail {
+        writing-mode: horizontal-tb;
+      }
+
+      .hero,
+      .chaos-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stamp {
+        max-width: 220px;
+        justify-self: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#formulario">Saltar a donde no ayuda</a>
+
+  <header class="ticker" aria-label="Avisos importantes">
+    <span>Atencion: este tramite expira cada vez que pestañeas. No cierres la pestaña imaginaria. La fila virtual avanza hacia atras.</span>
+  </header>
+
+  <div class="app">
+    <aside aria-label="Navegacion lateral confusa">
+      <h2>MENU OFICIAL</h2>
+      <button class="nav-button" type="button">Inicio final</button>
+      <button class="nav-button" type="button">Volver adelante</button>
+      <button class="nav-button" type="button">Preguntas frecuentes raras</button>
+      <button class="nav-button" type="button">Deshacer ayuda</button>
+      <button class="nav-button" type="button">Salir entrando</button>
+      <p class="tiny-note">Todos los botones de este menu son decorativos, como corresponde.</p>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div>
+          <h1>Certificado Oficial de Paciencia</h1>
+          <p>Complete el tramite para demostrar que puede sobrevivir a una interfaz que fue aprobada por un comite imaginario un viernes a las 18:59.</p>
+        </div>
+        <div class="stamp" aria-label="Sello decorativo oficial">
+          VALIDADO<br>POR<br>NADIE
+        </div>
+      </section>
+
+      <section class="chaos-grid">
+        <form id="formulario" novalidate>
+          <div class="field">
+            <label for="nombre">Nombre aproximado, no exacto</label>
+            <input id="nombre" name="nombre" autocomplete="off" placeholder="Ej: casi Ariel">
+            <span class="tiny-note">Si su nombre se siente demasiado real, sera cuestionado.</span>
+          </div>
+
+          <div class="field">
+            <label for="edad">Edad emocional invertida</label>
+            <input id="edad" name="edad" type="range" min="3" max="112" value="42">
+            <span>Edad declarada: <strong id="edadValor">70</strong> años en direccion contraria.</span>
+          </div>
+
+          <div class="field">
+            <label for="pais">Pais sospechosamente ordenado</label>
+            <select id="pais" name="pais">
+              <option>Argentina, pero depende</option>
+              <option>Uruguay si el mouse insiste</option>
+              <option>Chile en modo formulario</option>
+              <option>Colombia con acento administrativo</option>
+              <option>Otro pais que no quiso cargar</option>
+            </select>
+            <span class="tiny-note">Pase el mouse por arriba para reorganizar sus certezas.</span>
+          </div>
+
+          <div class="field">
+            <label for="password">Contraseña imposible</label>
+            <input id="password" name="password" type="password" placeholder="Exactamente peor que segura">
+            <ul class="rules">
+              <li>Debe tener exactamente 17 caracteres o no.</li>
+              <li>Debe incluir un color, una emocion y una duda existencial.</li>
+              <li>No debe ser demasiado buena porque incomoda al sistema.</li>
+              <li>Debe contener la letra Q, pero con humildad.</li>
+            </ul>
+          </div>
+
+          <div class="field">
+            <label for="paciencia">Nivel de paciencia certificado</label>
+            <select id="paciencia" name="paciencia">
+              <option value="0">Me queda una pestaña abierta</option>
+              <option value="1">Estoy respirando manualmente</option>
+              <option value="2">Acepto leer terminos imaginarios</option>
+              <option value="3">Puedo reintentar con menos dignidad</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Consentimientos mutuamente incompatibles</label>
+            <label class="check-row"><input type="checkbox" class="slippery-check"> Acepto no aceptar la aceptacion.</label>
+            <label class="check-row"><input type="checkbox" class="slippery-check"> Confirmo que no confirmo haber confirmado.</label>
+            <label class="check-row"><input type="checkbox" class="slippery-check"> Deseo recibir menos notificaciones sobre mas notificaciones.</label>
+          </div>
+
+          <div class="field">
+            <label>Captcha: seleccione los cuadrados que lo estan juzgando</label>
+            <div class="captcha" aria-label="Captcha falso">
+              <button class="tile" type="button">me mira</button>
+              <button class="tile" type="button">no se</button>
+              <button class="tile" type="button">tal vez</button>
+              <button class="tile" type="button">juzga</button>
+              <button class="tile" type="button">tramite</button>
+              <button class="tile" type="button">suspiro</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="submitBtn" class="main-action" type="submit">Enviar con confianza fragil</button>
+          </div>
+
+          <div class="button-row">
+            <button id="helpBtn" class="bad-help" type="button">Ayuda inutil</button>
+            <button id="worseBtn" class="worsen" type="button">Mejorar interfaz</button>
+          </div>
+
+          <section class="status" aria-live="polite">
+            <ul id="errors" class="error-list"></ul>
+            <div class="progress-shell" aria-label="Progreso falso">
+              <div id="progress" class="progress"></div>
+            </div>
+            <p id="statusText">Estado: esperando que el usuario cometa el primer error administrativo.</p>
+          </section>
+        </form>
+
+        <div class="side-panel">
+          <section class="panel">
+            <h3>Medidor de paciencia</h3>
+            <div class="patience-meter" aria-hidden="true"><span id="meter"></span></div>
+            <p id="meterText">8% restante. El sistema considera esto optimista.</p>
+          </section>
+
+          <section class="panel tooltip-zone">
+            <h3>Consejo contextual</h3>
+            <p>Pase el mouse por aqui para recibir ayuda que no cambia nada.</p>
+          </section>
+
+          <section class="panel">
+            <h3>Resumen oficial</h3>
+            <p>Su tramite esta casi no iniciado. El turno para pedir turno se habilita cuando deja de buscarlo.</p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="adrail">PUBLICIDAD INSTITUCIONAL: HAGA CLICK DONDE NO HAY BOTON</div>
+  </div>
+
+  <dialog id="helpDialog">
+    <h2>Centro de ayuda contradictoria</h2>
+    <p>Para completar el tramite, complete todos los campos incompletos, excepto los que deben quedar completos pero no demasiado.</p>
+    <p>Si el boton se mueve, significa que el sistema detecto entusiasmo. Espere a que se arrepienta.</p>
+    <div class="modal-actions">
+      <button class="bad-help" type="button" id="confuseMore">Entendi menos</button>
+      <button class="worsen" type="button" id="closeHelp">Cerrar aproximadamente</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const body = document.body;
+    const form = document.querySelector("#formulario");
+    const edad = document.querySelector("#edad");
+    const edadValor = document.querySelector("#edadValor");
+    const pais = document.querySelector("#pais");
+    const password = document.querySelector("#password");
+    const submitBtn = document.querySelector("#submitBtn");
+    const actions = document.querySelector(".actions");
+    const errors = document.querySelector("#errors");
+    const progress = document.querySelector("#progress");
+    const statusText = document.querySelector("#statusText");
+    const meter = document.querySelector("#meter");
+    const meterText = document.querySelector("#meterText");
+    const helpDialog = document.querySelector("#helpDialog");
+    const toast = document.querySelector("#toast");
+
+    const passiveErrors = [
+      "Error: el nombre parece demasiado seguro de si mismo.",
+      "La contraseña cumple demasiadas reglas. Intenta peor.",
+      "Tu paciencia no fue validada por el comite.",
+      "El pais seleccionado se movio emocionalmente.",
+      "Captcha insuficiente: ningun cuadrado admitio estar juzgando.",
+      "El sistema detecto intencion de terminar el tramite.",
+      "Falta adjuntar un archivo que esta prohibido adjuntar."
+    ];
+
+    const buttonLabels = [
+      "Enviar con confianza fragil",
+      "No presionar todavia",
+      "Cancelar envio positivo",
+      "Validar el casi",
+      "Boton secundario principal",
+      "Reintentar con menos dignidad"
+    ];
+
+    let patience = 8;
+    let toastTimer;
+    let submitAttempts = 0;
+
+    function updateAge() {
+      const inverted = Number(edad.max) + Number(edad.min) - Number(edad.value);
+      edadValor.textContent = inverted;
+      drainPatience(1);
+    }
+
+    function drainPatience(amount) {
+      patience = Math.max(0, patience - amount);
+      meter.style.width = `${Math.max(4, patience)}%`;
+      meterText.textContent = `${patience}% restante. El sistema considera esto ${patience < 4 ? "una oportunidad de crecimiento" : "optimista"}.`;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 2600);
+    }
+
+    function renderErrors(items) {
+      errors.innerHTML = "";
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        errors.appendChild(li);
+      });
+    }
+
+    function shuffleSelectOptions() {
+      const options = Array.from(pais.options);
+      options.sort(() => Math.random() - 0.5);
+      pais.replaceChildren(...options);
+      showToast("El orden del pais fue optimizado para generar dudas.");
+      drainPatience(1);
+    }
+
+    function moveSubmitButton() {
+      const maxX = Math.max(0, actions.clientWidth - submitBtn.offsetWidth - 12);
+      const maxY = Math.max(0, actions.clientHeight - submitBtn.offsetHeight - 12);
+      submitBtn.style.left = `${Math.floor(Math.random() * maxX)}px`;
+      submitBtn.style.top = `${Math.floor(Math.random() * maxY)}px`;
+      submitBtn.textContent = buttonLabels[Math.floor(Math.random() * buttonLabels.length)];
+      drainPatience(1);
+    }
+
+    function validateAbsurdly() {
+      const chosen = [];
+      const name = document.querySelector("#nombre").value.trim();
+      const captchaCount = document.querySelectorAll(".tile.selected").length;
+      const checks = document.querySelectorAll(".slippery-check:checked").length;
+      const pass = password.value;
+
+      if (name.length < 4 || name.toLowerCase().includes("exacto")) chosen.push(passiveErrors[0]);
+      if (pass.length === 17 || pass.length < 6 || !/q/i.test(pass)) chosen.push(passiveErrors[1]);
+      if (Number(document.querySelector("#paciencia").value) < 3) chosen.push(passiveErrors[2]);
+      if (pais.selectedIndex === 0) chosen.push(passiveErrors[3]);
+      if (captchaCount !== 2) chosen.push(passiveErrors[4]);
+      if (checks === 3) chosen.push(passiveErrors[5]);
+
+      if (chosen.length === 0) {
+        chosen.push(passiveErrors[Math.floor(Math.random() * passiveErrors.length)]);
+      }
+
+      return chosen;
+    }
+
+    async function fakeSubmit() {
+      submitAttempts += 1;
+      const validation = validateAbsurdly();
+      renderErrors(validation.slice(0, 3));
+      statusText.textContent = "Estado: procesando su paciencia en una fila circular.";
+      progress.style.width = "0%";
+
+      const steps = [7, 19, 43, 61, 78, 92, 99, 3, 18];
+      for (const step of steps) {
+        await new Promise((resolve) => window.setTimeout(resolve, 310));
+        progress.style.width = `${step}%`;
+        statusText.textContent = step === 99
+          ? "Estado: 99%. Falta validar que el 1% no se ofenda."
+          : `Estado: ${step}% de algo que no esta claro.`;
+      }
+
+      const finalMessage = submitAttempts % 2
+        ? "Fallo decoroso: el tramite casi quiso terminar, pero se arrepintio."
+        : "Reintento rechazado: ahora el sistema confia menos en su paciencia.";
+      renderErrors([finalMessage, ...validation.slice(0, 2)]);
+      statusText.textContent = "Puede reintentar con menos dignidad cuando el boton lo permita.";
+      submitBtn.textContent = "Reintentar con menos dignidad";
+      showToast("El expediente fue archivado en una carpeta que no existe.");
+      drainPatience(2);
+    }
+
+    edad.addEventListener("input", updateAge);
+    pais.addEventListener("mouseenter", shuffleSelectOptions);
+    submitBtn.addEventListener("mouseenter", moveSubmitButton);
+    submitBtn.addEventListener("focus", moveSubmitButton);
+
+    document.querySelectorAll(".slippery-check").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked && Math.random() > 0.45) {
+          window.setTimeout(() => {
+            checkbox.checked = false;
+            showToast("Un consentimiento se desmarco para proteger su confusion.");
+          }, 260);
+        }
+        drainPatience(1);
+      });
+    });
+
+    document.querySelectorAll(".tile").forEach((tile) => {
+      tile.addEventListener("click", () => {
+        tile.classList.toggle("selected");
+        tile.textContent = tile.classList.contains("selected") ? "me juzga mas" : "tal vez";
+        drainPatience(1);
+      });
+    });
+
+    password.addEventListener("input", () => {
+      if (password.value.length > 12) {
+        showToast("Advertencia: la contraseña esta mostrando ambicion.");
+      }
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      fakeSubmit();
+    });
+
+    document.querySelector("#helpBtn").addEventListener("click", () => {
+      if (typeof helpDialog.showModal === "function") {
+        helpDialog.showModal();
+      } else {
+        showToast("Ayuda: cierre los ojos y piense en un formulario mejor.");
+      }
+    });
+
+    document.querySelector("#closeHelp").addEventListener("click", () => helpDialog.close());
+    document.querySelector("#confuseMore").addEventListener("click", () => {
+      showToast("La ayuda fue actualizada sin mejorar.");
+      helpDialog.close();
+    });
+
+    document.querySelector("#worseBtn").addEventListener("click", () => {
+      body.classList.toggle("worse-mode");
+      showToast(body.classList.contains("worse-mode")
+        ? "Interfaz mejorada: ahora es peor."
+        : "Interfaz desmejorada: sigue siendo peor.");
+      drainPatience(2);
+    });
+
+    document.querySelectorAll(".nav-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        showToast("Navegacion simulada: usted permanece oficialmente aqui.");
+        moveSubmitButton();
+      });
+    });
+
+    updateAge();
+    renderErrors(["Aviso preventivo: ningun campo esta incorrecto todavia, pero falta poco."]);
+  </script>
+</body>
+</html>
