@@ -1,0 +1,444 @@
+openapi: 3.0.3
+info:
+  title: Municipal Procedures API
+  version: 1.0.0
+  description: REST API contract for managing municipal procedures and their related users.
+
+tags:
+  - name: Procedures
+    description: Operations for municipal procedures.
+  - name: Users
+    description: Operations for users related to a procedure.
+  - name: Payments
+    description: Operations for procedure payment status.
+
+paths:
+  /municipal-areas/{municipalAreaId}/procedures:
+    post:
+      tags:
+        - Procedures
+      summary: Create and submit a municipal procedure
+      operationId: createProcedure
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcedureCreate"
+      responses:
+        "201":
+          description: Procedure created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Procedure"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+
+  /municipal-areas/{municipalAreaId}/procedures/{procedureId}:
+    get:
+      tags:
+        - Procedures
+      summary: Get procedure status and details
+      operationId: getProcedure
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+      responses:
+        "200":
+          description: Procedure found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Procedure"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    put:
+      tags:
+        - Procedures
+      summary: Update editable procedure fields
+      operationId: updateProcedure
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcedureUpdate"
+      responses:
+        "200":
+          description: Procedure updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Procedure"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    delete:
+      tags:
+        - Procedures
+      summary: Delete a procedure
+      operationId: deleteProcedure
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+      responses:
+        "204":
+          description: Procedure deleted.
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+
+  /municipal-areas/{municipalAreaId}/procedures/{procedureId}/users:
+    post:
+      tags:
+        - Users
+      summary: Create a user for a procedure
+      operationId: createProcedureUser
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: User created and related to the procedure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+
+  /municipal-areas/{municipalAreaId}/procedures/{procedureId}/users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get a user related to a procedure
+      operationId: getProcedureUser
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    put:
+      tags:
+        - Users
+      summary: Update a user related to a procedure
+      operationId: updateProcedureUser
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    delete:
+      tags:
+        - Users
+      summary: Remove a user from a procedure
+      operationId: deleteProcedureUser
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: User removed from the procedure.
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+
+  /municipal-areas/{municipalAreaId}/procedures/{procedureId}/users/{userId}/payment:
+    get:
+      tags:
+        - Payments
+      summary: Get procedure payment status for a user
+      operationId: getProcedureUserPayment
+      parameters:
+        - $ref: "#/components/parameters/MunicipalAreaId"
+        - $ref: "#/components/parameters/ProcedureId"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Payment status found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+
+components:
+  parameters:
+    MunicipalAreaId:
+      name: municipalAreaId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Municipal area identifier.
+    ProcedureId:
+      name: procedureId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Procedure identifier.
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: User identifier.
+
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    MethodNotAllowed:
+      description: Method not allowed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    MunicipalArea:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "59d9299a-8b6b-4e71-b2c9-15e97e4f7d81"
+        name:
+          type: string
+          minLength: 1
+          example: "Permits Office"
+
+    Procedure:
+      type: object
+      required:
+        - id
+        - municipal_area_id
+        - user_tax_id
+        - description
+        - status
+        - users
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "ad97ac25-e581-4a66-9c2d-0ce691d12f61"
+        municipal_area_id:
+          type: string
+          format: uuid
+          example: "59d9299a-8b6b-4e71-b2c9-15e97e4f7d81"
+        user_tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        description:
+          type: string
+          minLength: 1
+          example: "Request for business operating permit."
+        status:
+          $ref: "#/components/schemas/ProcedureStatus"
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    ProcedureCreate:
+      type: object
+      required:
+        - user_tax_id
+        - description
+      properties:
+        user_tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        description:
+          type: string
+          minLength: 1
+          example: "Request for business operating permit."
+
+    ProcedureUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        user_tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        description:
+          type: string
+          minLength: 1
+          example: "Updated procedure description."
+
+    ProcedureStatus:
+      type: string
+      enum:
+        - submitted
+        - in_review
+        - approved
+        - rejected
+        - cancelled
+      example: "submitted"
+
+    User:
+      type: object
+      required:
+        - id
+        - tax_id
+        - first_name
+        - last_name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "00d46e6f-9a1c-4f8e-8a21-ea1747fb01ae"
+        tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        first_name:
+          type: string
+          minLength: 1
+          example: "Ariel"
+        last_name:
+          type: string
+          minLength: 1
+          example: "Cabello"
+
+    UserCreate:
+      type: object
+      required:
+        - tax_id
+        - first_name
+        - last_name
+      properties:
+        tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        first_name:
+          type: string
+          minLength: 1
+          example: "Ariel"
+        last_name:
+          type: string
+          minLength: 1
+          example: "Cabello"
+
+    UserUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        tax_id:
+          type: string
+          minLength: 1
+          example: "20-12345678-9"
+        first_name:
+          type: string
+          minLength: 1
+          example: "Ariel"
+        last_name:
+          type: string
+          minLength: 1
+          example: "Cabello"
+
+    Payment:
+      type: object
+      required:
+        - procedure_id
+        - user_id
+        - status
+      properties:
+        procedure_id:
+          type: string
+          format: uuid
+          example: "ad97ac25-e581-4a66-9c2d-0ce691d12f61"
+        user_id:
+          type: string
+          format: uuid
+          example: "00d46e6f-9a1c-4f8e-8a21-ea1747fb01ae"
+        status:
+          $ref: "#/components/schemas/PaymentStatus"
+
+    PaymentStatus:
+      type: string
+      enum:
+        - pending
+        - paid
+        - rejected
+        - cancelled
+      example: "pending"
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "not_found"
+        message:
+          type: string
+          example: "The requested resource was not found."
