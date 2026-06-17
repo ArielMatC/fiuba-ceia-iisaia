@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/* Kanagawa palette (Great Wave off Kanagawa). See ../../STYLEGUIDE.md */
+@theme {
+  --color-ink: #1f1f28;
+  --color-ink-elev: #2a2a37;
+  --color-ink-deep: #16161d;
+  --color-line: #54546d;
+  --color-fuji: #dcd7ba;
+  --color-oldwhite: #c8c093;
+  --color-muted: #727169;
+  --color-wave: #7e9cd8;
+  --color-wave-bright: #7fb4ca;
+  --color-wave-deep: #2d4f67;
+  --color-aqua: #7aa89f;
+  --color-sand: #e6c384;
+  --color-crimson: #c34043;
+  --color-crimson-bright: #e82424;
+}

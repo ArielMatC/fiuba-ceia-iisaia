@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TP Final — Desarrollo asistido por IA</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-elev: #1a2230;
+    --fg: #e6edf3;
+    --fg-dim: #8b98a5;
+    --accent: #f5a524;
+    --accent-2: #38bdf8;
+    --good: #4ade80;
+    --warn: #fb923c;
+    --border: #2a3441;
+    --code-bg: #0a0e13;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    height: 100%;
+    overflow: hidden;
+  }
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 64px 96px;
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    animation: fade .25s ease-out;
+  }
+  .slide.active { display: flex; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slide.cover { justify-content: center; align-items: flex-start; }
+  .cover-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide.cover > *:not(.cover-bg) {
+    position: relative;
+    z-index: 1;
+  }
+  .slide h1 {
+    font-size: 82px;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .slide h2 {
+    font-size: 80px;
+    margin: 0 0 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .slide h2 .num {
+    display: inline-block;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    margin-right: 14px;
+  }
+  .slide h3 {
+    font-size: 28px;
+    margin: 20px 0 10px;
+    color: var(--accent-2);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .slide p { font-size: 31px; line-height: 1.55; color: var(--fg); margin: 0 0 14px; }
+  .slide ul { font-size: 31px; line-height: 1.6; padding-left: 24px; margin: 0 0 16px; }
+  .slide li { margin-bottom: 8px; }
+  .slide li strong { color: var(--accent); font-weight: 600; }
+  .subtitle {
+    font-size: 38px;
+    color: var(--fg-dim);
+    margin-top: 8px;
+    font-weight: 400;
+  }
+  .meta {
+    margin-top: 56px;
+    font-size: 26px;
+    color: var(--fg-dim);
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .meta span strong { color: var(--fg); font-weight: 600; }
+  code, .mono {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.92em;
+    background: var(--code-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--accent-2);
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, Menlo, monospace;
+    font-size: 24px;
+    line-height: 1.55;
+    color: var(--fg);
+    overflow: auto;
+    margin: 0 0 16px;
+  }
+  pre code {
+    background: none; border: none; padding: 0; color: inherit; font-size: inherit;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+    flex: 1;
+    min-height: 0;
+  }
+  .cols-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+  }
+  .card h3 { margin-top: 0; }
+  .pill {
+    display: inline-block;
+    background: var(--bg-elev);
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    padding: 14px 30px;
+    font-size: 38px;
+    font-weight: 500;
+    color: var(--fg);
+    margin: 10px 12px 10px 0;
+  }
+  .pill.accent { border-color: var(--accent); color: var(--accent); }
+  .pill.cyan { border-color: var(--accent-2); color: var(--accent-2); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 56px;
+  }
+  th, td {
+    text-align: left;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent-2); font-weight: 600; font-size: 40px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td.file {
+    font-family: "JetBrains Mono", monospace;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .phase-head {
+    display: flex; align-items: baseline; gap: 16px; margin-bottom: 18px;
+  }
+  .phase-tag {
+    background: var(--accent);
+    color: #1a1300;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 23px;
+    letter-spacing: 0.04em;
+  }
+  .phase-title { font-size: 48px; font-weight: 600; margin: 0; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li {
+    padding-left: 44px;
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .checklist li::before {
+    content: "✓";
+    position: absolute;
+    left: 0; top: -2px;
+    color: var(--good);
+    font-weight: 700;
+  }
+  .math {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 22px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 31px;
+    color: var(--fg);
+    margin: 10px 0;
+    display: inline-block;
+  }
+  .math .var { color: var(--accent-2); }
+  .math .name { color: var(--accent); font-weight: 600; margin-right: 14px; }
+  .nav {
+    position: fixed;
+    bottom: 18px; right: 28px;
+    display: flex; align-items: center; gap: 16px;
+    color: var(--fg-dim);
+    font-size: 14px;
+    font-family: "JetBrains Mono", monospace;
+    z-index: 10;
+  }
+  .nav button {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width .2s ease-out;
+    z-index: 10;
+  }
+  .footer {
+    position: fixed;
+    bottom: 18px; left: 28px;
+    color: var(--fg-dim);
+    font-size: 13px;
+    font-family: "JetBrains Mono", monospace;
+    z-index: 10;
+  }
+  .grid-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 16px;
+  }
+  .feat {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .feat .label {
+    color: var(--accent-2);
+    font-size: 19px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .feat .value { font-size: 26px; font-weight: 500; }
+
+  /* File-tree map */
+  .ftree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 28px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .frow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 33px;
+    line-height: 1.1;
+    padding: 9px 8px;
+    border-radius: 8px;
+  }
+  .frow.dir { color: var(--accent-2); font-weight: 600; }
+  .frow.doc { color: var(--fg); }
+  .frow .cm { margin-left: auto; color: var(--fg-dim); font-size: 25px; font-weight: 400; }
+  .fgroup { margin-left: 18px; padding-left: 26px; border-left: 2px solid var(--border); }
+  .fdir, .fdoc { width: 24px; height: 24px; flex: none; display: inline-block; }
+  .fdir { background: rgba(56,189,248,0.16); border: 2px solid var(--accent-2); border-radius: 6px; }
+  .fdoc { background: rgba(245,165,36,0.12); border: 2px solid var(--accent); border-radius: 4px; }
+  /* Compact file-tree variant (embedded in a narrow column) */
+  .ftree.sm { padding: 14px 18px; border-radius: 10px; }
+  .ftree.sm .frow { font-size: 29px; padding: 4px 6px; gap: 10px; }
+  .ftree.sm .frow .cm { font-size: 22px; }
+  .ftree.sm .fdir, .ftree.sm .fdoc { width: 22px; height: 22px; border-width: 2px; }
+  .ftree.sm .fgroup { margin-left: 10px; padding-left: 16px; }
+
+  /* Rendered source file (CLAUDE.md) */
+  .mdfile {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .mdfile .bar {
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 18px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 18px;
+    color: var(--fg-dim);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .mdfile .bar .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .mdfile .bar .name { margin-left: 6px; color: var(--accent); font-weight: 600; }
+  .mdfile .body {
+    padding: 14px 22px 4px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .mdfile h4 {
+    color: var(--accent);
+    font-size: 17px;
+    margin: 2px 0 5px;
+    font-weight: 700;
+  }
+  .mdfile h4.title { font-size: 17px; color: var(--fg); margin-top: 0; }
+  .mdfile p { font-size: 15px; line-height: 1.3; color: var(--fg-dim); margin: 0 0 7px; }
+  .mdfile ul, .mdfile ol { font-size: 15px; line-height: 1.3; margin: 0 0 9px; padding-left: 20px; color: var(--fg); }
+  .mdfile li { margin-bottom: 2px; }
+  .mdfile .c { color: var(--accent-2); }
+  .mdfile .b { color: var(--fg); font-weight: 700; }
+  /* Enlarged file/code block variant (+30%) */
+  .mdfile.lg .bar { font-size: 23px; }
+  .mdfile.lg h4 { font-size: 22px; }
+  .mdfile.lg h4.title { font-size: 22px; }
+  .mdfile.lg p { font-size: 20px; }
+  .mdfile.lg ul, .mdfile.lg ol { font-size: 20px; }
+  .mdfile .sw {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.18);
+    margin-right: 4px;
+    vertical-align: -1px;
+  }
+  .mdfile h5 {
+    color: var(--accent-2);
+    font-size: 16px;
+    margin: 6px 0 3px;
+    font-weight: 700;
+  }
+  .mdfile .ti {
+    font-size: 14px;
+    line-height: 1.22;
+    color: var(--fg);
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 1px;
+  }
+  .mdfile .ti::before {
+    content: "✓";
+    position: absolute;
+    left: 2px; top: 0;
+    color: var(--good);
+    font-weight: 700;
+  }
+  .mdfile pre {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--fg);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .mdfile pre .k { color: var(--accent-2); }
+  .mdfile pre .s { color: var(--good); }
+  .mdfile .lr { font-size: 13.5px; line-height: 1.3; color: var(--fg-dim); padding-left: 14px; margin: 1px 0; }
+  .mdfile .lr b { color: var(--fg); font-weight: 700; }
+  /* slide 9 — settings.json panel at 2x */
+  .mdfile.s2x .bar { font-size: 22px; }
+  .mdfile.s2x h4.title { font-size: 34px; margin-bottom: 12px; }
+  .mdfile.s2x pre { font-size: 30px; line-height: 1.3; }
+  .mdfile.s2x p { font-size: 30px; line-height: 1.3; }
+  /* lessons.md / todo.md panels at 1.5x */
+  .mdfile.l15 .bar { font-size: 21px; }
+  .mdfile.l15 h4 { font-size: 25px; }
+  .mdfile.l15 h4.title { font-size: 25px; margin-bottom: 7px; }
+  .mdfile.l15 p { font-size: 22px; }
+  .mdfile.l15 h5 { font-size: 24px; margin: 8px 0 4px; }
+  .mdfile.l15 .ti { font-size: 21px; }
+  .mdfile.l15 .lr { font-size: 20px; }
+  .mdfile.l15 ul, .mdfile.l15 ol { font-size: 22px; }
+  /* ARCHITECTURE.md panel at 1.2x */
+  .mdfile.l12 .bar { font-size: 22px; }
+  .mdfile.l12 h4 { font-size: 20px; }
+  .mdfile.l12 h4.title { font-size: 20px; }
+  .mdfile.l12 p { font-size: 18px; }
+  .mdfile.l12 ul, .mdfile.l12 ol { font-size: 18px; }
+  .mdfile.l12 pre { font-size: 18px; }
+  .mdfile.l12 table { font-size: 16px; }
+  .mdfile.l12 th, .mdfile.l12 td { font-size: 16px; }
+  .mdfile.scroll .body { max-height: 66vh; overflow-y: auto; }
+  .mdfile table { width: 100%; font-size: 13px; border-collapse: collapse; margin: 0 0 9px; }
+  .mdfile th, .mdfile td {
+    font-size: 13px; padding: 3px 8px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    text-transform: none; letter-spacing: normal; white-space: normal;
+    color: var(--fg-dim); font-weight: 400;
+  }
+  .mdfile th { color: var(--accent-2); font-weight: 700; }
+  .mdfile td:first-child { color: var(--fg); }
+  .mdfile pre {
+    background: rgba(56,189,248,0.06);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 11px; line-height: 1.3;
+    padding: 10px 12px; margin: 0 0 9px;
+    color: var(--fg-dim); overflow-x: auto;
+  }
+
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) ;
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 20px;
+  }
+  .flow .step {
+    background: var(--bg-elev);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 26px;
+    position: relative;
+  }
+  .flow .step .k { font-size: 26px; color: var(--accent); font-family: "JetBrains Mono", monospace; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .flow .step .t { font-size: 44px; font-weight: 700; line-height: 1.1; margin-bottom: 14px; }
+  .flow .step p { font-size: 30px; color: var(--fg-dim); line-height: 1.3; margin: 0; }
+
+  /* Cyclic loop layout (learning loop slide) */
+  .cycle { position: relative; width: 1180px; height: 540px; margin: 8px auto 0; }
+  .cycle .ring { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cycle .node {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 360px; background: var(--bg-elev);
+    border: 2px solid var(--border); border-radius: 16px;
+    padding: 20px 26px; text-align: left;
+  }
+  .cycle .node .k { font-size: 23px; color: var(--accent); font-family: "JetBrains Mono", monospace; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .cycle .node .t { font-size: 40px; font-weight: 700; line-height: 1.05; margin-bottom: 8px; }
+  .cycle .node p { font-size: 25px; color: var(--fg-dim); line-height: 1.3; margin: 0; }
+  .cycle .hub {
+    position: absolute; left: 590px; top: 310px; transform: translate(-50%, -50%);
+    width: 200px; height: 200px; border-radius: 50%;
+    background: var(--code-bg); border: 3px solid var(--accent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .cycle .hub .cmd { font-size: 44px; color: var(--accent); font-family: "JetBrains Mono", monospace; font-weight: 700; }
+  .cycle .hub .lbl { font-size: 21px; color: var(--fg-dim); margin-top: 6px; }
+
+  .big-stat { display:flex; gap:48px; flex-wrap:wrap; margin-top: 24px; }
+  .big-stat .stat { text-align: left; }
+  .big-stat .stat .n { font-size: 120px; font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -0.02em; }
+  .big-stat .stat .l { font-size: 34px; color: var(--fg-dim); margin-top: 10px; }
+
+  /* XL scale for in-person presentation */
+  .slide.xl h1 { font-size: 150px; }
+  .slide.xl h2 { font-size: 80px; margin-bottom: 32px; }
+  .slide.xl h3 { font-size: 56px; }
+  .slide.xl p { font-size: 50px; line-height: 1.4; }
+  .slide.xl ul, .slide.xl li { font-size: 50px; line-height: 1.45; }
+  .slide.xl .subtitle { font-size: 64px; }
+  .slide.xl .meta { font-size: 44px; gap: 44px; margin-top: 80px; }
+  .slide.xl .card { padding: 38px 44px; border-radius: 18px; }
+  .slide.xl .card p { font-size: 42px; line-height: 1.4; margin-bottom: 18px; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1: COVER -->
+  <section class="slide cover xl active">
+    <svg class="cover-bg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <pattern id="coverGrid" width="80" height="80" patternUnits="userSpaceOnUse">
+          <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#f5a524" stroke-width="1" opacity="0.05"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#coverGrid)"/>
+      <!-- Node graph: context files feeding a central agent -->
+      <g opacity="0.13" stroke="#f5a524" stroke-width="3" fill="none">
+        <line x1="960" y1="540" x2="380" y2="240"/>
+        <line x1="960" y1="540" x2="380" y2="540"/>
+        <line x1="960" y1="540" x2="380" y2="840"/>
+        <line x1="960" y1="540" x2="1540" y2="240"/>
+        <line x1="960" y1="540" x2="1540" y2="540"/>
+        <line x1="960" y1="540" x2="1540" y2="840"/>
+      </g>
+      <g fill="#f5a524" opacity="0.16">
+        <circle cx="380" cy="240" r="14"/>
+        <circle cx="380" cy="540" r="14"/>
+        <circle cx="380" cy="840" r="14"/>
+        <circle cx="1540" cy="240" r="14"/>
+        <circle cx="1540" cy="540" r="14"/>
+        <circle cx="1540" cy="840" r="14"/>
+      </g>
+      <circle cx="960" cy="540" r="26" fill="#38bdf8" opacity="0.22"/>
+    </svg>
+    <h1>Construido con IA</h1>
+    <div class="subtitle">Cómo se desarrolló <strong style="color:var(--accent)">Oil Production Forecaster</strong><br/>con Claude Code: contexto, reglas, skills y un loop de aprendizaje</div>
+    <div class="meta">
+      <span><strong>TP Final</strong> — IISAIA / FIUBA</span>
+      <span>Ariel Cabello</span>
+      <span>2026</span>
+    </div>
+  </section>
+
+  <!-- 2: TESIS + MAPA (merged) -->
+  <section class="slide">
+    <h2><span class="num">00</span>La idea central</h2>
+    <p style="font-size:54px;line-height:1.4;margin-bottom:22px">Se construyó un <strong>entorno de trabajo</strong>
+       alrededor del agente: documentos que son fuente de verdad, reglas que acotan el comportamiento,
+       skills que automatizan rituales y un loop que hace que el proyecto <em>se vuelva más inteligente
+       en cada sesión</em>.</p>
+    <div class="cols" style="gap:32px;grid-template-columns:0.8fr 1.2fr">
+      <!-- IZQ: el problema -->
+      <div class="card">
+        <h3 style="margin-top:0;font-size:45px">El problema de trabajar con un agente</h3>
+        <ul style="font-size:48px;line-height:1.55">
+          <li>Cada sesión arranca sin memoria</li>
+          <li>Tiende a expandir el alcance solo</li>
+          <li>Repite errores ya resueltos</li>
+          <li>La doc se desincroniza del código</li>
+        </ul>
+      </div>
+      <!-- DER: la respuesta = el andamiaje (mapa) + cuatro roles -->
+      <div style="display:flex;flex-direction:column;min-height:0">
+        <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <h3 style="margin-top:0;font-size:45px">La respuesta de este proyecto</h3>
+          <div class="cols" style="gap:24px;grid-template-columns:1fr;flex:1;min-height:0">
+            <div>
+              <div class="ftree sm">
+              <div class="frow dir"><span class="fdir"></span>tp-final/</div>
+              <div class="fgroup">
+                <div class="frow doc"><span class="fdoc"></span>CLAUDE.md<span class="cm">hechos estables</span></div>
+                <div class="frow doc"><span class="fdoc"></span>ARCHITECTURE.md<span class="cm">mapa estructural</span></div>
+                <div class="frow doc"><span class="fdoc"></span>STYLEGUIDE.md<span class="cm">identidad visual</span></div>
+                <div class="frow dir"><span class="fdir"></span>.claude/</div>
+                <div class="fgroup">
+                  <div class="frow dir"><span class="fdir"></span>rules/<span class="cm">cómo trabajar</span></div>
+                  <div class="frow dir"><span class="fdir"></span>skills/<span class="cm">/comandos</span></div>
+                  <div class="frow doc"><span class="fdoc"></span>settings.json<span class="cm">hook</span></div>
+                </div>
+                <div class="frow dir"><span class="fdir"></span>docs/</div>
+                <div class="fgroup">
+                  <div class="frow doc"><span class="fdoc"></span>decisions.md<span class="cm">el porqué</span></div>
+                  <div class="frow doc"><span class="fdoc"></span>openapi.yaml<span class="cm">spec</span></div>
+                  <div class="frow doc"><span class="fdoc"></span>csv-format.md</div>
+                </div>
+                <div class="frow dir"><span class="fdir"></span>tasks/</div>
+                <div class="fgroup">
+                  <div class="frow doc"><span class="fdoc"></span>todo.md<span class="cm">tracker</span></div>
+                  <div class="frow doc"><span class="fdoc"></span>lessons.md<span class="cm">memoria</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: PLAN INICIAL -->
+  <section class="slide">
+    <h2><span class="num">01</span>El plan inicial</h2>
+    <div class="cols" style="gap:48px;grid-template-columns:1.5fr 1fr">
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <p style="font-size:37px;line-height:1.3;margin-bottom:12px">
+          Antes de escribir código se escribió la <strong>especificación completa</strong> y un plan en
+          <strong>cinco fases</strong> en <code>tasks/todo.md</code>. Regla de oro: entrar en
+          <em>plan mode</em>, aprobar el plan, y recién ahí implementar.
+        </p>
+        <div class="cols-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+          <div class="card" style="padding:15px 20px">
+            <div class="phase-tag" style="margin-bottom:10px;font-size:32px;padding:8px 18px">FASE 0</div>
+            <h3 style="margin-top:0;font-size:38px;line-height:1.1;margin-bottom:8px">Setup</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">Scaffolding, tooling, README, CSV de ejemplo.</p>
+          </div>
+          <div class="card" style="padding:15px 20px">
+            <div class="phase-tag" style="margin-bottom:10px;font-size:32px;padding:8px 18px">FASE 1</div>
+            <h3 style="margin-top:0;font-size:38px;line-height:1.1;margin-bottom:8px">Backend — Dominio</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">Modelos, CSV upload, persistencia, tests del parser.</p>
+          </div>
+          <div class="card" style="padding:15px 20px">
+            <div class="phase-tag" style="margin-bottom:10px;font-size:32px;padding:8px 18px">FASE 2</div>
+            <h3 style="margin-top:0;font-size:38px;line-height:1.1;margin-bottom:8px">Backend — Forecast</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">Motor Arps, endpoint forecast, tests sintéticos.</p>
+          </div>
+          <div class="card" style="padding:15px 20px">
+            <div class="phase-tag" style="margin-bottom:10px;font-size:32px;padding:8px 18px">FASE 3</div>
+            <h3 style="margin-top:0;font-size:38px;line-height:1.1;margin-bottom:8px">Frontend</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">Cliente API, páginas, gráficos, formulario.</p>
+          </div>
+          <div class="card" style="padding:15px 20px">
+            <div class="phase-tag" style="margin-bottom:10px;font-size:32px;padding:8px 18px">FASE 4</div>
+            <h3 style="margin-top:0;font-size:38px;line-height:1.1;margin-bottom:8px">Integración</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">CORS, dataset demo, walkthrough E2E, README final.</p>
+          </div>
+          <div class="card" style="padding:15px 20px;border-style:dashed">
+            <h3 style="margin-top:0;color:var(--accent-2);font-size:38px;line-height:1.1;margin-bottom:8px">Definition of done</h3>
+            <p style="font-size:30px;color:var(--fg-dim);line-height:1.25;margin:0">Tests verdes · coverage ≥ 85% · demo verificable · Review escrito.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mdfile l15">
+        <div class="bar">
+          <span class="dot" style="background:#ef4444"></span>
+          <span class="dot" style="background:#f5a524"></span>
+          <span class="dot" style="background:#4ade80"></span>
+          <span class="name">tp-final/tasks/todo.md</span>
+        </div>
+        <div class="body">
+          <h4 class="title"># TP Final — Oil Production Forecaster — Tracker</h4>
+          <p>App de pronóstico por pozo con curvas de Arps. Backend FastAPI + SQLite,
+            frontend React + Vite, input CSV.</p>
+
+          <h4>## Fases (checklist)</h4>
+          <h5>### Fase 0 — Setup</h5>
+          <div class="ti">Scaffolding backend (FastAPI, ruff, pytest)</div>
+          <div class="ti">Scaffolding frontend (Vite + TS, eslint, Tailwind)</div>
+          <div class="ti">README raíz con arranque (back + front)</div>
+          <div class="ti"><span class="c">.gitignore</span> y <span class="c">docs/csv-format.md</span></div>
+
+          <h5>### Fase 1 — Backend: dominio mínimo</h5>
+          <div class="ti">Modelos SQLAlchemy + schema al arranque</div>
+          <div class="ti">Schemas Pydantic</div>
+          <div class="ti"><span class="c">POST /api/wells/upload</span> (validación, upsert, dedupe)</div>
+          <div class="ti"><span class="c">GET /api/wells</span>, <span class="c">/production</span></div>
+          <div class="ti">Tests: parser de CSV</div>
+          <div class="ti">Regenerar <span class="c">docs/openapi.yaml</span></div>
+
+          <h5>### Fase 2 — Backend: motor de forecast</h5>
+          <div class="ti"><span class="c">services/arps.py</span>: fit 3 variantes + R²</div>
+          <div class="ti"><span class="c">predict()</span> y <span class="c">eur(cutoff)</span></div>
+          <div class="ti"><span class="c">POST /api/wells/{id}/forecast</span></div>
+          <div class="ti"><span class="c">GET /forecasts/{id}</span>, <span class="c">/wells/{id}/forecasts</span></div>
+          <div class="ti">Tests: fit sintético, EUR, fit fallido</div>
+          <div class="ti">Regenerar <span class="c">docs/openapi.yaml</span></div>
+
+          <h5>### Fase 3 — Frontend</h5>
+          <div class="ti">Cliente API tipado + react-query</div>
+          <div class="ti">Página Upload (dropzone, preview)</div>
+          <div class="ti">Página Wells (tabla + navegación)</div>
+          <div class="ti">Página Well Detail (gráfico + forecast)</div>
+          <div class="ti">Toggle log-Y, tooltip, export CSV</div>
+
+          <h5>### Fase 4 — Integración y pulido</h5>
+          <div class="ti">CORS + <span class="c">VITE_API_URL</span></div>
+          <div class="ti">Dataset demo (<span class="c">docs/sample-data.csv</span>)</div>
+          <div class="ti">Walkthrough E2E manual</div>
+          <div class="ti">README final</div>
+
+          <h4>## Review (post-implementación)</h4>
+          <p>Por fase: qué se hizo, qué quedó pendiente, lecciones.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4: CLAUDE.md -->
+  <section class="slide">
+    <h2><span class="num">02</span><code style="font-size:0.7em">CLAUDE.md</code> — el hub</h2>
+    <div class="cols" style="gap:48px">
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <p style="font-size:34px;line-height:1.4">El archivo que Claude Code <strong>carga
+          automáticamente</strong> al inicio de cada sesión. Es la primera cosa que el agente lee.</p>
+        <h3>El principio</h3>
+        <p style="font-size:31px;line-height:1.4;color:var(--fg-dim)">Deliberadamente <strong style="color:var(--accent)">corto</strong>:
+          solo hechos estables, sin historia. La historia vive en <code>lessons.md</code> y <code>decisions.md</code>.</p>
+        <h3>Qué define</h3>
+        <ul style="font-size:30px;line-height:1.4">
+          <li>Identidad del proyecto y estado actual</li>
+          <li><strong>Source of truth</strong> — a qué archivo ir para cada cosa</li>
+          <li>Comandos exactos (backend vía <code>uv</code>, frontend npm)</li>
+          <li>Workflow por fases</li>
+          <li><strong>Project Learning Protocol</strong> — cómo el proyecto se vuelve más inteligente</li>
+        </ul>
+        <p style="font-size:27px;line-height:1.35;color:var(--fg-dim);margin-top:12px">
+          Cada comando que aparece acá se ganó por experiencia: salió de un error real y se promovió a verdad estable.
+        </p>
+      </div>
+      <div class="mdfile l15 scroll">
+      <div class="bar">
+        <span class="dot" style="background:#ef4444"></span>
+        <span class="dot" style="background:#f5a524"></span>
+        <span class="dot" style="background:#4ade80"></span>
+        <span class="name">tp-final/CLAUDE.md</span>
+      </div>
+      <div class="body">
+        <h4 class="title"># Oil Production Forecaster — TP Final (IISAIA / FIUBA)</h4>
+        <p>Web app that forecasts per-well oil production using Arps decline curves. Backend:
+          FastAPI + SQLAlchemy 2.x + SQLite + SciPy. Frontend: React 19 + TypeScript + Vite.</p>
+        <p><span class="b">Current state</span>: MVP complete (Phases 0–4). Backend with 31 tests
+          at ~95% coverage; typed React SPA; verified end-to-end in a browser.</p>
+
+        <h4>## Source of truth</h4>
+        <ul>
+          <li><span class="c">ARCHITECTURE.md</span> — structural map (modules, data model, API, flows)</li>
+          <li><span class="c">STYLEGUIDE.md</span> — brand identity, color/typography tokens, UI patterns</li>
+          <li><span class="c">docs/decisions.md</span> — design decision log (ADR-lite, the <em>why</em>)</li>
+          <li><span class="c">tasks/todo.md</span> — phase plan + per-phase Review (tracker, not design)</li>
+          <li><span class="c">tasks/lessons.md</span> — lessons across sessions (injected by a hook)</li>
+          <li><span class="c">docs/presentation.html</span> — project presentation (scope)</li>
+        </ul>
+
+        <h4>## Commands</h4>
+        <p>Backend (from <span class="c">backend/</span>, managed with <span class="b">uv</span> — never call
+          <span class="c">python</span> directly, the system default is 3.9):</p>
+        <ul>
+          <li><span class="c">uv sync</span> — create/update the env (Python 3.12, pinned)</li>
+          <li><span class="c">uv run uvicorn app.main:app --reload --port 8000</span></li>
+          <li><span class="c">uv run pytest --cov=app</span> — tests / coverage</li>
+          <li><span class="c">uv run ruff check .</span> / <span class="c">black --check .</span></li>
+          <li><span class="c">uv run python -m scripts.export_openapi</span> — export spec (enforced by a sync test)</li>
+        </ul>
+        <p>Frontend (from <span class="c">frontend/</span>): <span class="c">npm run dev</span> ·
+          <span class="c">build</span> · <span class="c">lint</span> · <span class="c">format</span>.</p>
+
+        <h4>## Workflow</h4>
+        <ul>
+          <li>Each phase starts in plan mode and closes with <span class="c">/phase-review</span></li>
+          <li>Done only when: tests pass, coverage ≥ 85%, demo verifiable, Review updated</li>
+          <li>Detailed conventions live in <span class="c">.claude/rules/</span></li>
+        </ul>
+
+        <h4>## Project Learning Protocol</h4>
+        <ol>
+          <li>After any correction, decision, or gotcha → run <span class="c">/learn</span></li>
+          <li>Routing: lessons → <span class="c">lessons.md</span>; decisions → <span class="c">decisions.md</span>;
+            stable facts → this file or <span class="c">.claude/rules/</span></li>
+          <li>Keep this file short: stable facts only, no history</li>
+          <li>End any session that changed code by running <span class="c">/learn</span></li>
+        </ol>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6: ARCHITECTURE.md -->
+  <section class="slide">
+    <h2><span class="num">03</span><code style="font-size:0.7em">ARCHITECTURE.md</code></h2>
+    <div class="cols" style="gap:48px">
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <p style="font-size:30px;line-height:1.35;margin-bottom:18px">El <strong>mapa estructural</strong>: qué es cada parte, dónde vive y cómo fluye un request. El diseño vive acá; el <em>porqué</em> en decisions.md.</p>
+        <div class="card">
+          <h3 style="margin-top:0">Capas (backend)</h3>
+          <p style="font-size:26px;line-height:1.3">Layering estricto: <code>routers</code> solo HTTP · <code>services</code> la lógica · <code>models</code> el ORM · <code>schemas</code> Pydantic.</p>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-top:0">Modelo + API</h3>
+          <p style="font-size:26px;line-height:1.3">4 tablas con cascada; 10 endpoints documentados en una tabla; flujos de <em>upload</em> y <em>forecast</em> descritos paso a paso.</p>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">Frontend</h3>
+          <p style="font-size:26px;line-height:1.28">React 19 + TS + Vite; estado server vía <code>TanStack&nbsp;Query</code>; gráficos Recharts con log-Y; páginas Upload / Wells / WellDetail.</p>
+        </div>
+        <div class="card" style="margin-top:12px;border-color:var(--accent-2)">
+          <p style="font-size:26px;margin:0;line-height:1.3">
+            <strong style="color:var(--accent-2)">Regla de oro:</strong> este archivo se actualiza
+            <em>en el mismo cambio</em> que altera la estructura — nuevo módulo, tabla, endpoint o
+            responsabilidad movida. La doc no puede driftear del código.
+          </p>
+        </div>
+      </div>
+      <div class="mdfile scroll l12">
+      <div class="bar">
+        <span class="dot" style="background:#ef4444"></span>
+        <span class="dot" style="background:#f5a524"></span>
+        <span class="dot" style="background:#4ade80"></span>
+        <span class="name">tp-final/ARCHITECTURE.md</span>
+      </div>
+      <div class="body">
+        <h4 class="title"># Architecture — Oil Production Forecaster</h4>
+        <p>Structural map of the system: what each part is, where it lives, and how a request flows.
+          The <em>why</em> lives in <span class="c">docs/decisions.md</span>; phase status in
+          <span class="c">tasks/todo.md</span>; UI tokens in <span class="c">STYLEGUIDE.md</span>.</p>
+        <p style="border-left:3px solid var(--accent);padding-left:10px"><span class="b">Maintenance</span>:
+          update in the same change that alters structure — new module, table, endpoint, page, or a
+          moved responsibility. See <span class="c">.claude/rules/docs.md</span>.</p>
+
+        <h4>## 1. Overview</h4>
+        <p>A single-user web app that forecasts per-well oil production with Arps decline curves.</p>
+        <pre>┌──────────────┐    HTTP/JSON     ┌──────────────┐   SQLAlchemy   ┌──────────┐
+│  Frontend    │ ───────────────▶ │   Backend    │ ─────────────▶ │  SQLite  │
+│ React 19 SPA │ ◀─────────────── │   FastAPI    │ ◀───────────── │  (file)  │
+│ (port 5173)  │      CORS        │ (port 8000)  │                │          │
+└──────────────┘                  └──────────────┘                └──────────┘</pre>
+        <p>No auth, single SQLite file, schema created at startup. CORS restricted to
+          <span class="c">http://localhost:5173</span>.</p>
+
+        <h4>## 2. Backend (<span class="c">backend/</span>)</h4>
+        <p>Strict layering — routers do HTTP only, services hold business logic, models are the ORM.</p>
+        <table>
+          <thead><tr><th>Layer</th><th>Path</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td>App / lifespan</td><td class="c">app/main.py</td><td>FastAPI app, CORS, router wiring, init_db() on startup, GET /api/health</td></tr>
+            <tr><td>DB</td><td class="c">app/db.py</td><td>Engine, SessionLocal, get_db dependency, init_db</td></tr>
+            <tr><td>Models (ORM)</td><td class="c">app/models/</td><td>Well, ProductionData, Forecast, ForecastData</td></tr>
+            <tr><td>Schemas</td><td class="c">app/schemas/</td><td>Pydantic v2 request/response models</td></tr>
+            <tr><td>Routers</td><td class="c">app/api/*.py</td><td>HTTP endpoints, validation, status codes</td></tr>
+            <tr><td>Services</td><td class="c">services/csv_loader</td><td>Pure CSV parse + validation (no DB)</td></tr>
+            <tr><td></td><td class="c">services/wells</td><td>Upsert/ingest, aggregates, production queries</td></tr>
+            <tr><td></td><td class="c">services/arps</td><td>Decline-curve fit / predict / EUR (pure math)</td></tr>
+            <tr><td></td><td class="c">services/forecast</td><td>Orchestrates fit + persists forecast series</td></tr>
+            <tr><td>Scripts</td><td class="c">scripts/export_openapi</td><td>Dumps the live schema to docs/openapi.yaml</td></tr>
+          </tbody>
+        </table>
+        <h4 style="color:var(--fg)">### Request flows</h4>
+        <p><span class="b">Upload</span> (<span class="c">POST /api/wells/upload</span>): router reads the file →
+          <span class="c">csv_loader.parse_production_csv</span> (bytes → validated records + rejected rows;
+          missing columns → 422) → <span class="c">wells.ingest_records</span> (upsert well by name, upsert
+          production by <span class="c">(well_id, date)</span>, last-wins) → <span class="c">UploadSummary</span>.</p>
+        <p><span class="b">Forecast</span> (<span class="c">POST /api/wells/{id}/forecast</span>): router validates
+          <span class="c">model_type</span> → <span class="c">forecast.run_forecast</span> loads production,
+          converts dates to months-since-first (float), <span class="c">arps.fit</span> (bounded curve_fit,
+          hyperbolic falls back to exponential), computes a month limit, caps <span class="c">arps.eur</span>
+          at the economic cutoff and persists monthly points only while rate ≥ cutoff → <span class="c">ForecastDetail</span>.</p>
+
+        <h4>## 3. Data model (SQLite)</h4>
+        <ul>
+          <li><span class="c">wells</span> — id, name (unique), field, operator, oil_rate_unit, created_at</li>
+          <li><span class="c">production_data</span> — id, well_id (fk, cascade), date, oil_rate; unique (well_id, date)</li>
+          <li><span class="c">forecasts</span> — id, well_id (fk, cascade), model_type, params_json, r_squared, horizon_months, economic_cutoff, eur, created_at</li>
+          <li><span class="c">forecast_data</span> — id, forecast_id (fk, cascade), date, predicted_rate</li>
+        </ul>
+        <p>All deletes cascade. No migrations (MVP) — recreate the DB file on schema change.</p>
+
+        <h4>## 4. API surface</h4>
+        <table>
+          <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>GET</td><td class="c">/api/health</td><td>Liveness probe</td></tr>
+            <tr><td>POST</td><td class="c">/api/wells/upload</td><td>Upload CSV → upsert wells + production</td></tr>
+            <tr><td>GET</td><td class="c">/api/wells</td><td>List wells with aggregates</td></tr>
+            <tr><td>GET</td><td class="c">/api/wells/{id}</td><td>Well detail</td></tr>
+            <tr><td>GET</td><td class="c">/api/wells/{id}/production</td><td>Production series</td></tr>
+            <tr><td>DELETE</td><td class="c">/api/wells/{id}</td><td>Delete well + dependents</td></tr>
+            <tr><td>POST</td><td class="c">/api/wells/{id}/forecast</td><td>Fit + persist + return forecast</td></tr>
+            <tr><td>GET</td><td class="c">/api/wells/{id}/forecasts</td><td>Forecasts for a well</td></tr>
+            <tr><td>GET</td><td class="c">/api/forecasts/{id}</td><td>Forecast detail with points</td></tr>
+            <tr><td>DELETE</td><td class="c">/api/forecasts/{id}</td><td>Delete forecast</td></tr>
+          </tbody>
+        </table>
+        <p>Spec auto-generated by FastAPI (<span class="c">/docs</span>, <span class="c">/redoc</span>) and exported
+          to <span class="c">docs/openapi.yaml</span>; <span class="c">test_openapi_sync.py</span> fails if it drifts.</p>
+
+        <h4>## 5. Domain — Arps decline curves</h4>
+        <p>Three variants by exponent <span class="c">b</span>: exponential (b=0), hyperbolic (0&lt;b&lt;1),
+          harmonic (b=1). Fit with <span class="c">scipy.optimize.curve_fit</span> under physical bounds; time is
+          months-since-first-point (float, no resampling). EUR integrates the fitted rate to the economic-cutoff
+          time or the displayed limit, then scales months→days. Formulas in
+          <span class="c">.claude/rules/domain-arps.md</span>.</p>
+
+        <h4>## 6. Frontend (<span class="c">frontend/</span>)</h4>
+        <p>React 19 + TypeScript (strict) + Vite. State/fetching via TanStack Query; charts via Recharts;
+          styling via Tailwind v4. Visual tokens in <span class="c">STYLEGUIDE.md</span>.</p>
+        <table>
+          <thead><tr><th>Concern</th><th>Path</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Entry / router</td><td class="c">src/main.tsx</td><td>QueryClientProvider + createBrowserRouter</td></tr>
+            <tr><td>Layout</td><td class="c">src/App.tsx</td><td>Header + nav + Outlet</td></tr>
+            <tr><td>API client</td><td class="c">src/api/client.ts</td><td>Typed fetch wrapper; base URL from VITE_API_URL</td></tr>
+            <tr><td>API types</td><td class="c">src/api/types.ts</td><td>Mirrors backend schemas</td></tr>
+            <tr><td>API debugger</td><td class="c">src/api/debugger.ts</td><td>In-memory HTTP request log</td></tr>
+            <tr><td>Data hooks</td><td class="c">src/api/hooks.ts</td><td>Query/mutation hooks + cache keys</td></tr>
+            <tr><td>Pages</td><td class="c">src/pages/*.tsx</td><td>Welcome, Upload, Wells, WellDetail</td></tr>
+            <tr><td>Components</td><td class="c">src/components/*.tsx</td><td>ProductionChart, ApiDebugger</td></tr>
+          </tbody>
+        </table>
+        <p>Routes: <span class="c">/</span> (welcome/login), <span class="c">/wells</span>,
+          <span class="c">/upload</span>, <span class="c">/wells/:wellId</span>.</p>
+
+        <h4>## 7. Cross-cutting</h4>
+        <ul>
+          <li><span class="b">Config</span>: backend port 8000; frontend VITE_API_URL (default http://localhost:8000)</li>
+          <li><span class="b">CORS</span>: backend allows http://localhost:5173 only</li>
+          <li><span class="b">Toolchain</span>: backend via uv (Python 3.12; system python is 3.9 — never call it); frontend via npm</li>
+          <li><span class="b">Tests</span>: backend pytest (~95% coverage); frontend lint + build</li>
+        </ul>
+
+        <h4>## 8. Risks &amp; constraints (MVP)</h4>
+        <ul>
+          <li><span class="b">Hyperbolic convergence</span>: noisy/short series can defeat curve_fit; mitigated by bounds, initial guess, exponential fallback</li>
+          <li><span class="b">Irregular dates</span>: time is months-since-first as float; no resampling</li>
+          <li><span class="b">EUR ↔ cutoff</span>: comparable only at equal cutoffs/horizons; cutoff always stored</li>
+          <li><span class="b">Single scale</span>: only oil_rate is forecast; gas/water out of scope</li>
+          <li><span class="b">No migrations / no auth / single user</span>: deliberate MVP scope</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7: STYLEGUIDE.md -->
+  <section class="slide">
+    <h2><span class="num">04</span><code style="font-size:0.7em">STYLEGUIDE.md</code></h2>
+    <div class="cols">
+      <div>
+        <p style="font-size:36px;line-height:1.4">Identidad visual inspirada en <em>La Gran Ola de Kanagawa</em> (Hokusai): noche sumi-ink, ola azul cristal como acento, amarillo carpa de realce.</p>
+        <h3>Define como verdad</h3>
+        <ul style="font-size:32px;line-height:1.4">
+          <li>Tokens de color (hex autoritativos)</li>
+          <li>Tipografía y escala</li>
+          <li>Paleta del gráfico (Recharts)</li>
+          <li>Patrones de componentes (botones, tablas, toasts, debugger)</li>
+        </ul>
+        <p style="font-size:30px;color:var(--fg-dim);line-height:1.35;margin-top:14px">El frontend <strong>debe</strong> usar estos tokens, no valores ad-hoc.</p>
+      </div>
+      <div class="mdfile l15">
+        <div class="bar">
+          <span class="dot" style="background:#ef4444"></span>
+          <span class="dot" style="background:#f5a524"></span>
+          <span class="dot" style="background:#4ade80"></span>
+          <span class="name">tp-final/STYLEGUIDE.md</span>
+        </div>
+        <div class="body">
+          <h4 class="title"># Style Guide — Oil Production Forecaster</h4>
+
+          <h4>## 1. Brand</h4>
+          <p>Hokusai's <em>Great Wave off Kanagawa</em>: deep sumi-ink night, crystal-blue wave accent,
+            carp-yellow highlights, over fuji-white text. Logo: a stylized cresting wave.</p>
+
+          <h4>## 2. Color tokens <span style="font-weight:400;color:var(--fg-dim)">(Tailwind @theme)</span></h4>
+          <ul>
+            <li>Surfaces — <span class="sw" style="background:#1F1F28"></span><span class="c">ink #1F1F28</span> ·
+              <span class="sw" style="background:#2A2A37"></span><span class="c">ink-elev #2A2A37</span> ·
+              <span class="sw" style="background:#16161D"></span><span class="c">ink-deep #16161D</span> ·
+              <span class="sw" style="background:#54546D"></span><span class="c">line #54546D</span></li>
+            <li>Text — <span class="sw" style="background:#DCD7BA"></span><span class="c">fuji #DCD7BA</span> ·
+              <span class="sw" style="background:#C8C093"></span><span class="c">oldwhite #C8C093</span> ·
+              <span class="sw" style="background:#727169"></span><span class="c">muted #727169</span></li>
+            <li>Accent — <span class="sw" style="background:#7E9CD8"></span><span class="c">wave #7E9CD8</span> ·
+              <span class="sw" style="background:#7FB4CA"></span><span class="c">wave-bright #7FB4CA</span> ·
+              <span class="sw" style="background:#2D4F67"></span><span class="c">wave-deep #2D4F67</span> ·
+              <span class="sw" style="background:#7AA89F"></span><span class="c">aqua #7AA89F</span></li>
+            <li>Highlight — <span class="sw" style="background:#E6C384"></span><span class="c">sand #E6C384</span> ·
+              <span class="sw" style="background:#C34043"></span><span class="c">crimson #C34043</span></li>
+          </ul>
+
+          <h4>## 3. Typography</h4>
+          <p>Tailwind default sans stack (no custom font). Title <span class="c">text-2xl</span>,
+            body <span class="c">text-sm</span>, meta <span class="c">text-xs</span>.</p>
+
+          <h4>## 4. Chart palette (Recharts)</h4>
+          <p>Grid <span class="c">#363646</span>, axis <span class="c">muted</span>, tooltip <span class="c">ink-deep</span>.
+            History dots = <span class="c">fuji</span>; forecast lines = wave / sand / aqua / wave-bright / oldwhite.
+            Log-Y is a first-class toggle.</p>
+
+          <h4>## 5. Component patterns</h4>
+          <ul>
+            <li>Buttons — <span class="c">bg-wave</span> → hover <span class="c">bg-wave-bright</span></li>
+            <li>Panels — <span class="c">border-line bg-ink-elev/40</span></li>
+            <li>Tables — header <span class="c">muted</span>, row hover <span class="c">bg-ink-elev/50</span></li>
+            <li>Toasts — bottom-right; destructive uses a crimson confirm</li>
+            <li>HTTP debugger — floating bug button + bottom inspector panel</li>
+          </ul>
+
+          <h4>## 6. Spacing &amp; radius</h4>
+          <p>Rhythm <span class="c">space-y-6</span>; cards <span class="c">p-4 rounded-lg</span>;
+            controls <span class="c">rounded</span>.</p>
+
+          <h4>## 7. Logo</h4>
+          <p><span class="c">WaveLogo.tsx</span> — deep wave-blue body, crystal-blue curl, foam claws in
+            fuji-white, pale carp-yellow sun disc.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8: RULES -->
+  <section class="slide">
+    <h2><span class="num">05</span><code style="font-size:0.7em">.claude/rules/</code></h2>
+    <p style="font-size:38px;line-height:1.35;margin-bottom:14px">Reglas que acotan <em>cómo</em> trabaja el agente. Algunas se cargan siempre; otras solo cuando se tocan ciertos paths (via frontmatter <code>paths:</code>).</p>
+    <table style="font-size:34px">
+      <thead><tr><th>Archivo</th><th>Alcance</th><th>Qué fija</th></tr></thead>
+      <tbody>
+        <tr><td class="file">workflow.md</td><td>siempre</td><td>todo.md como fuente de verdad, plan mode, definition of done</td></tr>
+        <tr><td class="file">domain-arps.md</td><td>siempre</td><td>las 3 variantes, bounds del fit, fallback, EUR↔cutoff</td></tr>
+        <tr><td class="file">backend.md</td><td><code>backend/**</code></td><td>layering, errores 422/404, pytest ≥ 85%, export OpenAPI</td></tr>
+        <tr><td class="file">frontend.md</td><td><code>frontend/**</code></td><td>React 19 strict sin <code>any</code>, TanStack Query, tokens del styleguide</td></tr>
+        <tr><td class="file">docs.md</td><td>siempre</td><td>docs vivas: actualizar en el mismo cambio que el código</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:20px;color:var(--fg-dim);font-size:32px;line-height:1.35">
+      El <em>path-scoping</em> mantiene el contexto liviano: las reglas de backend no contaminan una sesión de frontend.
+    </p>
+  </section>
+
+  <!-- 9: SKILLS -->
+  <section class="slide">
+    <h2><span class="num">06</span><code style="font-size:0.7em">.claude/skills/</code> — habilidades</h2>
+    <p style="font-size:45px;line-height:1.3;margin-bottom:14px">Comandos que encapsulan procesos repetibles del proyecto. Se invocan como <code>/nombre</code>.
+      Convierten conocimiento de proceso en algo <strong>ejecutable y consistente</strong> — no depende de recordar los pasos.</p>
+    <div class="cols-3" style="gap:20px">
+      <div class="card" style="padding:18px 20px">
+        <h3 style="margin-top:0;color:var(--accent);font-size:42px"><code style="color:var(--accent);background:none;border:none;padding:0">/learn</code></h3>
+        <p style="font-size:36px;line-height:1.3">Revisa la sesión y persiste lo aprendido. <strong>Rutea</strong> cada hallazgo: correcciones → lessons, decisiones → decisions, hechos estables → CLAUDE.md / rules.</p>
+        <div class="mdfile lg" style="margin-top:14px">
+          <div class="bar">
+            <span class="dot" style="background:#ef4444"></span>
+            <span class="dot" style="background:#f5a524"></span>
+            <span class="dot" style="background:#4ade80"></span>
+            <span class="name">skills/learn/SKILL.md</span>
+          </div>
+          <div class="body">
+            <p style="margin:0 0 6px"><span class="c">--- name: learn ---</span></p>
+            <h4 class="title"># /learn — project learning loop</h4>
+            <ol>
+              <li>Escanear: correcciones · decisiones · gotchas · hechos estables</li>
+              <li>Rutear: corrección/gotcha → <span class="c">lessons.md</span>; decisión → <span class="c">decisions.md</span>; hecho estable → <span class="c">CLAUDE.md</span> / rules</li>
+              <li>Revisar destino: actualizar, no duplicar</li>
+              <li>Si una lección contradice una rule → arreglar la rule</li>
+              <li>Reportar qué se capturó y dónde</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:18px 20px">
+        <h3 style="margin-top:0;color:var(--accent);font-size:42px"><code style="color:var(--accent);background:none;border:none;padding:0">/phase-review</code></h3>
+        <p style="font-size:36px;line-height:1.3">Cierra una fase: corre tests + coverage + linters, tilda checkboxes en todo.md, escribe el Review y dispara <code>/learn</code>. Una fase no cierra con checks rojos.</p>
+        <div class="mdfile lg" style="margin-top:14px">
+          <div class="bar">
+            <span class="dot" style="background:#ef4444"></span>
+            <span class="dot" style="background:#f5a524"></span>
+            <span class="dot" style="background:#4ade80"></span>
+            <span class="name">skills/phase-review/SKILL.md</span>
+          </div>
+          <div class="body">
+            <p style="margin:0 0 6px"><span class="c">--- name: phase-review ---</span></p>
+            <h4 class="title"># /phase-review — phase closure</h4>
+            <ol>
+              <li>Identificar la fase (<span class="c">todo.md §6</span>)</li>
+              <li>Verificar: pytest + coverage ≥ 85%, ruff/black; eslint + build; demo</li>
+              <li>Si algo falla: parar, reportar, arreglar</li>
+              <li>Tildar en todo.md solo lo realmente hecho</li>
+              <li>Escribir el Review de la fase</li>
+              <li>Correr <span class="c">/learn</span></li>
+              <li>Resumir: estado, evidencia, pendientes</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:18px 20px">
+        <h3 style="margin-top:0;color:var(--accent);font-size:42px"><code style="color:var(--accent);background:none;border:none;padding:0">/run-app</code></h3>
+        <p style="font-size:36px;line-height:1.3">Levanta backend + frontend y hace smoke-check: <code>/api/health</code>, <code>/docs</code>, <code>/api/wells</code> y el root sin errores de consola.</p>
+        <div class="mdfile lg" style="margin-top:14px">
+          <div class="bar">
+            <span class="dot" style="background:#ef4444"></span>
+            <span class="dot" style="background:#f5a524"></span>
+            <span class="dot" style="background:#4ade80"></span>
+            <span class="name">skills/run-app/SKILL.md</span>
+          </div>
+          <div class="body">
+            <p style="margin:0 0 6px"><span class="c">--- name: run-app ---</span></p>
+            <h4 class="title"># /run-app — start + smoke-check</h4>
+            <ol>
+              <li>Backend: <span class="c">uv run uvicorn app.main:app --port 8000</span></li>
+              <li>Frontend: <span class="c">npm run dev</span> (Vite 5173)</li>
+              <li>Smoke: <span class="c">/api/health</span> 200, <span class="c">/docs</span> 200, <span class="c">/api/wells</span> 200, root sin errores</li>
+              <li>Reportar URLs; si falla, mostrar el error real</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10: HOOK + MEMORIA -->
+  <section class="slide">
+    <h2><span class="num">07</span>Memoria entre sesiones</h2>
+    <p style="font-size:30px;line-height:1.3;margin-bottom:14px">Un hook <code>SessionStart</code> en <code>settings.json</code> inyecta,
+      al iniciar cada sesión, todo <code>lessons.md</code> + los pendientes de <code>todo.md</code>.
+      El agente nunca arranca <strong>"en frío"</strong>: ya conoce los gotchas y qué falta.</p>
+    <div class="cols" style="gap:40px;grid-template-columns:0.92fr 1.08fr">
+      <div class="mdfile s2x">
+        <div class="bar">
+          <span class="dot" style="background:#ef4444"></span>
+          <span class="dot" style="background:#f5a524"></span>
+          <span class="dot" style="background:#4ade80"></span>
+          <span class="name">.claude/settings.json</span>
+        </div>
+        <div class="body">
+          <h4 class="title">El hook que reinyecta la memoria</h4>
+<pre>{
+  <span class="k">"hooks"</span>: {
+    <span class="k">"SessionStart"</span>: [{
+      <span class="k">"hooks"</span>: [{
+        <span class="k">"type"</span>: <span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"powershell</span>
+          <span class="s"># volcar lessons.md</span>
+          <span class="s"># + pendientes de todo.md"</span>
+      }]
+    }]
+  }
+}</pre>
+          <p style="margin-top:10px">UTF-8 por los acentos en Windows. Único hook;
+            solo se dispara desde <span class="c">tp-final/</span>.</p>
+        </div>
+      </div>
+      <div class="mdfile l15">
+        <div class="bar">
+          <span class="dot" style="background:#ef4444"></span>
+          <span class="dot" style="background:#f5a524"></span>
+          <span class="dot" style="background:#4ade80"></span>
+          <span class="name">tp-final/tasks/lessons.md</span>
+        </div>
+        <div class="body">
+          <h4 class="title"># Lessons Learned</h4>
+          <p style="margin-bottom:7px">Capturadas por <span class="c">/learn</span>. Cada entrada: Context · Lesson · Rule.</p>
+          <h5>## 2026-06-02 — columna <span class="c">date</span> rompe <span class="c">Mapped</span> de SQLAlchemy</h5>
+          <div class="lr"><b>Lesson</b>: el atributo <span class="c">date</span> tapa el tipo <span class="c">date</span> importado</div>
+          <div class="lr"><b>Rule</b>: alias el tipo (<span class="c">date as DateType</span>) al mapear esa columna</div>
+          <h5>## 2026-06-05 — uploads necesitan <span class="c">python-multipart</span>; ruff <span class="c">B008</span></h5>
+          <h5>## 2026-06-10 — Browser E2E: usar el Preview MCP</h5>
+          <h5>## 2026-06-12 — el <span class="c">python</span> del sistema es 3.9 → todo vía <span class="c">uv</span></h5>
+          <h5>## 2026-06-12 — <span class="c">npm create vite</span> pierde <span class="c">--template</span> (Windows)</h5>
+          <h5>## 2026-06-12 — Node 22.12 &lt; rango soportado de eslint 10</h5>
+          <h5>## 2026-06-15 — la config solo carga desde la raíz de sesión</h5>
+          <h5>## 2026-06-17 — cutoff y EUR comparten la base temporal del gráfico</h5>
+          <p style="margin-top:8px">Cada una costó un error una vez. Los estables se promueven a <span class="c">CLAUDE.md</span> / rules.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12: LOOP DE APRENDIZAJE -->
+  <section class="slide">
+    <h2><span class="num">08</span>El loop de aprendizaje</h2>
+    <p style="font-size:38px;line-height:1.35;margin-bottom:6px">"Este proyecto debe volverse más inteligente cada sesión." El routing del conocimiento es explícito:</p>
+    <div class="cycle">
+      <svg class="ring" viewBox="0 0 1180 540" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <marker id="ah" markerWidth="5" markerHeight="5" refX="3.2" refY="2.5" orient="auto">
+            <path d="M0 0 L5 2.5 L0 5 z" fill="#f5a524"/>
+          </marker>
+        </defs>
+        <g fill="none" stroke="#f5a524" stroke-width="5" stroke-linecap="round" opacity="0.9" marker-end="url(#ah)">
+          <path d="M747 110 A420 205 0 0 1 1006 329"/>
+          <path d="M849 462 A420 205 0 0 1 331 462"/>
+          <path d="M174 329 A420 205 0 0 1 433 110"/>
+        </g>
+        <text x="318" y="178" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#8b98a5">alimenta la</text>
+        <text x="318" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#8b98a5">próxima sesión</text>
+      </svg>
+      <div class="hub">
+        <div class="cmd">/learn</div>
+        <div class="lbl">rutea y promueve</div>
+      </div>
+      <div class="node" style="left:590px;top:95px">
+        <div class="k">CORRECCIÓN / GOTCHA</div>
+        <div class="t">lessons.md</div>
+        <p>Contexto · Lección · Regla. La historia operativa.</p>
+      </div>
+      <div class="node" style="left:954px;top:402px">
+        <div class="k">DECISIÓN DE DISEÑO</div>
+        <div class="t">decisions.md</div>
+        <p>Contexto · Decisión · Consecuencias. El porqué.</p>
+      </div>
+      <div class="node" style="left:226px;top:402px">
+        <div class="k">HECHO ESTABLE</div>
+        <div class="t">CLAUDE.md / rules</div>
+        <p>Comandos y convenciones confirmadas. La verdad vigente.</p>
+      </div>
+    </div>
+    <p style="margin-top:16px;font-size:32px;color:var(--fg-dim);line-height:1.35">
+      Una lección que se vuelve permanente se <strong>promueve</strong> a CLAUDE.md o a una rule y se borra de lessons.
+      Si una lección contradice una rule, se arregla la rule: las rules reflejan la verdad actual, lessons guarda la historia.
+    </p>
+  </section>
+
+  <!-- 13: FLUJO POR FASE -->
+  <section class="slide">
+    <h2><span class="num">09</span>El ciclo de cada fase</h2>
+    <div class="cycle" style="height:610px">
+      <svg class="ring" viewBox="0 0 1180 610" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <marker id="ah2" markerWidth="5" markerHeight="5" refX="3.2" refY="2.5" orient="auto">
+            <path d="M0 0 L5 2.5 L0 5 z" fill="#f5a524"/>
+          </marker>
+        </defs>
+        <g fill="none" stroke="#f5a524" stroke-width="5" stroke-linecap="round" opacity="0.9" marker-end="url(#ah2)">
+          <path d="M693 97 A300 205 0 0 1 872 220"/>
+          <path d="M872 360 A300 205 0 0 1 693 483"/>
+          <path d="M487 483 A300 205 0 0 1 308 360"/>
+          <path d="M308 220 A300 205 0 0 1 487 97"/>
+        </g>
+        <text x="350" y="150" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#8b98a5">fase N</text>
+        <text x="350" y="178" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#8b98a5">→ fase N+1</text>
+      </svg>
+      <div class="hub" style="top:290px">
+        <div class="cmd">↻</div>
+        <div class="lbl">cada fase</div>
+      </div>
+      <div class="node" style="left:590px;top:64px;width:300px">
+        <div class="k">1 · PLAN</div>
+        <div class="t">Plan mode</div>
+        <p>Spec en todo.md; plan aprobado antes de codear.</p>
+      </div>
+      <div class="node" style="left:945px;top:290px;width:300px">
+        <div class="k">2 · BUILD</div>
+        <div class="t">Implementar</div>
+        <p>Bajo las rules del path; docs en el mismo commit.</p>
+      </div>
+      <div class="node" style="left:590px;top:520px;width:300px">
+        <div class="k">3 · VERIFY</div>
+        <div class="t">/phase-review</div>
+        <p>Tests, coverage ≥ 85%, linters, demo.</p>
+      </div>
+      <div class="node" style="left:235px;top:290px;width:300px">
+        <div class="k">4 · LEARN</div>
+        <div class="t">/learn</div>
+        <p>Persistir lecciones y decisiones.</p>
+      </div>
+    </div>
+    <p style="margin-top:32px;font-size:36px;line-height:1.4">
+      El loop se realimenta: lo aprendido en la fase N entra por el hook al inicio de la fase N+1.
+      Nada se marca como hecho sin demostrarlo con output real.
+    </p>
+  </section>
+
+  <!-- 14: RESULTADO + CIERRE -->
+  <section class="slide">
+    <h2><span class="num">10</span>Resultado y conclusiones</h2>
+    <div class="cols" style="gap:56px">
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <div class="big-stat" style="gap:28px 40px;margin-top:0">
+          <div class="stat"><div class="n">5</div><div class="l">fases planificadas<br/>y completadas (0–4)</div></div>
+          <div class="stat"><div class="n">31</div><div class="l">tests de backend<br/>todos en verde</div></div>
+          <div class="stat"><div class="n">95%</div><div class="l">coverage de backend<br/>(meta era ≥ 85%)</div></div>
+          <div class="stat"><div class="n">E2E</div><div class="l">verificado en navegador<br/>(Preview MCP)</div></div>
+        </div>
+        <div class="card" style="margin-top:32px">
+          <p style="font-size:27px;margin:0;line-height:1.4">
+            Walkthrough real: upload de <code>sample-data.csv</code> → 2 pozos / 60 puntos →
+            forecast hiperbólico con <strong>R² = 0.9949</strong> y <strong>EUR = 600.540</strong> →
+            gráfico con histórico + forecast superpuesto, toggle log-Y, y fetch CORS browser→API OK.
+          </p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <h3 style="margin-top:0;font-size:42px">Para llevarse</h3>
+        <ul class="checklist" style="font-size:46px;line-height:1.3">
+          <li>La IA no reemplaza al ingeniero: se le construye un <strong>entorno</strong> donde rinde</li>
+          <li>Documentos como <strong>fuente de verdad</strong>, no como adorno post-hoc</li>
+          <li>Reglas y skills convierten criterio en algo <strong>repetible y verificable</strong></li>
+          <li>Un loop de memoria hace que los errores <strong>no se repitan</strong></li>
+          <li>Plan → build → verify → learn, fase tras fase</li>
+        </ul>
+        <p style="font-size:45px;color:var(--fg-dim);margin-top:22px;line-height:1.35">
+          El andamiaje de IA fue, él mismo, un entregable del TP.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer"><span id="slideNum">1</span> / <span id="slideTotal">1</span></div>
+<div class="nav">
+  <button id="prev" aria-label="anterior">‹</button>
+  <button id="next" aria-label="siguiente">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let idx = 0;
+  document.getElementById('slideTotal').textContent = total;
+  const progress = document.getElementById('progress');
+  function go(n) {
+    idx = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    document.getElementById('slideNum').textContent = idx + 1;
+    progress.style.width = ((idx + 1) / total * 100) + '%';
+    history.replaceState(null, '', '#' + (idx + 1));
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(total - 1);
+  });
+  document.getElementById('next').addEventListener('click', () => go(idx + 1));
+  document.getElementById('prev').addEventListener('click', () => go(idx - 1));
+  document.getElementById('deck').addEventListener('click', (e) => {
+    if (e.target.closest('.nav') || e.target.closest('a') || e.target.closest('button')) return;
+    const x = e.clientX, w = window.innerWidth;
+    if (x > w * 0.6) go(idx + 1);
+    else if (x < w * 0.4) go(idx - 1);
+  });
+  const hash = parseInt(location.hash.replace('#', ''), 10);
+  if (!isNaN(hash)) go(hash - 1);
+  else go(0);
+</script>
+</body>
+</html>

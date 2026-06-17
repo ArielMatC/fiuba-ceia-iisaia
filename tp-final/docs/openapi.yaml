@@ -1,0 +1,573 @@
+openapi: 3.1.0
+info:
+  title: Oil Production Forecaster API
+  version: 0.1.0
+paths:
+  /api/wells/upload:
+    post:
+      tags:
+      - wells
+      summary: Upload Wells
+      operationId: upload_wells_api_wells_upload_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_wells_api_wells_upload_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSummary'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/wells:
+    get:
+      tags:
+      - wells
+      summary: List Wells
+      operationId: list_wells_api_wells_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WellSummary'
+                type: array
+                title: Response List Wells Api Wells Get
+  /api/wells/{well_id}:
+    get:
+      tags:
+      - wells
+      summary: Get Well
+      operationId: get_well_api_wells__well_id__get
+      parameters:
+      - name: well_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Well Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WellDetail'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - wells
+      summary: Delete Well
+      operationId: delete_well_api_wells__well_id__delete
+      parameters:
+      - name: well_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Well Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/wells/{well_id}/production:
+    get:
+      tags:
+      - wells
+      summary: Get Production
+      operationId: get_production_api_wells__well_id__production_get
+      parameters:
+      - name: well_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Well Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductionPoint'
+                title: Response Get Production Api Wells  Well Id  Production Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/wells/{well_id}/forecast:
+    post:
+      tags:
+      - forecasts
+      summary: Create Forecast
+      operationId: create_forecast_api_wells__well_id__forecast_post
+      parameters:
+      - name: well_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Well Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForecastRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastDetail'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/wells/{well_id}/forecasts:
+    get:
+      tags:
+      - forecasts
+      summary: List Forecasts
+      operationId: list_forecasts_api_wells__well_id__forecasts_get
+      parameters:
+      - name: well_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Well Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ForecastSummary'
+                title: Response List Forecasts Api Wells  Well Id  Forecasts Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/forecasts/{forecast_id}:
+    get:
+      tags:
+      - forecasts
+      summary: Get Forecast
+      operationId: get_forecast_api_forecasts__forecast_id__get
+      parameters:
+      - name: forecast_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Forecast Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastDetail'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - forecasts
+      summary: Delete Forecast
+      operationId: delete_forecast_api_forecasts__forecast_id__delete
+      parameters:
+      - name: forecast_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Forecast Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/health:
+    get:
+      summary: Health
+      operationId: health_api_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Api Health Get
+components:
+  schemas:
+    Body_upload_wells_api_wells_upload_post:
+      properties:
+        file:
+          type: string
+          contentMediaType: application/octet-stream
+          title: File
+        oil_rate_unit:
+          type: string
+          title: Oil Rate Unit
+          default: bbl/d
+      type: object
+      required:
+      - file
+      title: Body_upload_wells_api_wells_upload_post
+    ForecastDetail:
+      properties:
+        id:
+          type: integer
+          title: Id
+        well_id:
+          type: integer
+          title: Well Id
+        model_type:
+          type: string
+          title: Model Type
+        params_json:
+          additionalProperties: true
+          type: object
+          title: Params Json
+        r_squared:
+          type: number
+          title: R Squared
+        horizon_months:
+          type: integer
+          title: Horizon Months
+        economic_cutoff:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Economic Cutoff
+        eur:
+          type: number
+          title: Eur
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        points:
+          items:
+            $ref: '#/components/schemas/ForecastPoint'
+          type: array
+          title: Points
+      type: object
+      required:
+      - id
+      - well_id
+      - model_type
+      - params_json
+      - r_squared
+      - horizon_months
+      - economic_cutoff
+      - eur
+      - created_at
+      - points
+      title: ForecastDetail
+    ForecastPoint:
+      properties:
+        date:
+          type: string
+          format: date
+          title: Date
+        predicted_rate:
+          type: number
+          title: Predicted Rate
+      type: object
+      required:
+      - date
+      - predicted_rate
+      title: ForecastPoint
+    ForecastRequest:
+      properties:
+        model_type:
+          type: string
+          title: Model Type
+          default: hyperbolic
+        horizon_months:
+          type: integer
+          title: Horizon Months
+          default: 60
+        economic_cutoff:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Economic Cutoff
+      type: object
+      title: ForecastRequest
+    ForecastSummary:
+      properties:
+        id:
+          type: integer
+          title: Id
+        well_id:
+          type: integer
+          title: Well Id
+        model_type:
+          type: string
+          title: Model Type
+        params_json:
+          additionalProperties: true
+          type: object
+          title: Params Json
+        r_squared:
+          type: number
+          title: R Squared
+        horizon_months:
+          type: integer
+          title: Horizon Months
+        economic_cutoff:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Economic Cutoff
+        eur:
+          type: number
+          title: Eur
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - well_id
+      - model_type
+      - params_json
+      - r_squared
+      - horizon_months
+      - economic_cutoff
+      - eur
+      - created_at
+      title: ForecastSummary
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ProductionPoint:
+      properties:
+        date:
+          type: string
+          format: date
+          title: Date
+        oil_rate:
+          type: number
+          title: Oil Rate
+      type: object
+      required:
+      - date
+      - oil_rate
+      title: ProductionPoint
+    RejectedRow:
+      properties:
+        line:
+          type: integer
+          title: Line
+        reason:
+          type: string
+          title: Reason
+      type: object
+      required:
+      - line
+      - reason
+      title: RejectedRow
+    UploadSummary:
+      properties:
+        wells_new:
+          type: integer
+          title: Wells New
+        wells_existing:
+          type: integer
+          title: Wells Existing
+        points_loaded:
+          type: integer
+          title: Points Loaded
+        rows_rejected:
+          type: integer
+          title: Rows Rejected
+        rejected:
+          items:
+            $ref: '#/components/schemas/RejectedRow'
+          type: array
+          title: Rejected
+      type: object
+      required:
+      - wells_new
+      - wells_existing
+      - points_loaded
+      - rows_rejected
+      - rejected
+      title: UploadSummary
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WellDetail:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Field
+        operator:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Operator
+        oil_rate_unit:
+          type: string
+          title: Oil Rate Unit
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - field
+      - operator
+      - oil_rate_unit
+      - created_at
+      title: WellDetail
+    WellSummary:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Field
+        operator:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Operator
+        oil_rate_unit:
+          type: string
+          title: Oil Rate Unit
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        point_count:
+          type: integer
+          title: Point Count
+        first_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: First Date
+        last_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Last Date
+        last_oil_rate:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Last Oil Rate
+        forecast_count:
+          type: integer
+          title: Forecast Count
+      type: object
+      required:
+      - id
+      - name
+      - field
+      - operator
+      - oil_rate_unit
+      - created_at
+      - point_count
+      - first_date
+      - last_date
+      - last_oil_rate
+      - forecast_count
+      title: WellSummary
+      description: Well plus aggregate stats for the listing view.
